@@ -37,9 +37,6 @@ const Capabilities = {
 	}
 };
 
-//Get the Medooze Media Server interface
-const MediaServer = require("medooze-media-server");
-
 //Check 
 if (process.argv.length!=3)
 	 throw new Error("Missing IP address\nUsage: node index.js <ip>");
@@ -50,8 +47,8 @@ const ip = process.argv[2];
 const endpoint = MediaServer.createEndpoint(ip);
 
 const options = {
-	key: fs.readFileSync ("server.key"),
-	cert: fs.readFileSync ("server.cert")
+	key: FS.readFileSync ("server.key"),
+	cert: FS.readFileSync ("server.cert")
 };
 
 //Enable debug
@@ -63,12 +60,20 @@ MediaServer.setPortRange(10000,20000);
 
 //Create rest api
 const rest = Express();
-rest.use(BodyParser.json());
+rest.use(function(req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "*");
+	res.header("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");
+	next();
+});
+rest.use(BodyParser.text({type:"application/sdp"}));
 rest.post("/whip/:streamId" , (req, res)=>{
+	//Get body
+	const body = req.body;
 	//Get streamId
-	const streamId = req.streamId;
+	const streamId = req.params.streamId;
 	//Get offer
-	const offer =  SDPInfo.process(req.body);
+	const offer =  SDPInfo.process(body);
 	//Get now
 	const ts = Date.now();
 	//Get dump file
