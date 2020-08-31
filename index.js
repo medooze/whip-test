@@ -89,7 +89,7 @@ rest.post("/whip/:streamId" , (req, res)=>{
 	});
 	transport.on("dtlsstate" ,(state)=>{
 		console.log(streamId +"::dtlsstate::"+state);
-		if (state=="failed")
+		if (state=="failed" || state=="closed")
 			transport.stop();
 	});
 			
